@@ -5,13 +5,15 @@ class Page
     protected $pathOfContent = '';
     protected $title = '';
     protected $wrapper = '';
+    protected $jsScript = [];
 
-    public function __construct($title, $pathOfContent)
+    public function __construct($title, $pathOfContent, $scripts)
     {
         $this->title = $title;
         $this->pathOfContent = $pathOfContent;
+        $this->jsScript = $scripts;
     }
-    public function includeStart()
+    public function includeStart():string
     {
         return '
         <!doctype html>
@@ -43,12 +45,12 @@ class Page
     }
 
 
-    public function includeNav()
+    public function includeNav():string
     {
         return '';
     }
 
-    public function includeContent()
+    public function includeContent():string
     {
 
         return '            <h1>' . $this->title . '</h1>
@@ -56,7 +58,18 @@ class Page
 
     }
 
-    public function includeEnd()
+    public function includeScipts()
+    {
+        $s = '';
+        if(sizeof($this->jsScript)>0){
+            foreach ($this->jsScript as $js){
+                $s .= '<script type="text/javascript" src="./' . $js . '"></script>';
+            }
+        }
+        return $s;
+    }
+
+    public function includeEnd():string
     {
         return'
                      <!-- footer -->
@@ -71,18 +84,66 @@ class Page
             <script type="text/javascript" src="./lib/jquery/jquery.js"></script>
             <!-- Latest compiled and minified Bootstrap JavaScript -->
             <script src="./lib/bootstrap/js/bootstrap.js" ></script>
+            <!-- Other scripts -->
+            ' . $this->includeScipts() . '
         </body>
         </html>
     ';
     }
 
-    public function display()
+    public function display():string
     {
-
-
-
         return $this->includeStart() . $this->includeNav() . $this->includeContent() . $this->includeEnd();
 
     }
+
+    /**
+     * @return string
+     */
+    public function getPathOfContent(): string
+    {
+        return $this->pathOfContent;
+    }
+
+    /**
+     * @param string $pathOfContent
+     */
+    public function setPathOfContent(string $pathOfContent)
+    {
+        $this->pathOfContent = $pathOfContent;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTitle(): string
+    {
+        return $this->title;
+    }
+
+    /**
+     * @param string $title
+     */
+    public function setTitle(string $title)
+    {
+        $this->title = $title;
+    }
+
+    /**
+     * @return string
+     */
+    public function getWrapper(): string
+    {
+        return $this->wrapper;
+    }
+
+    /**
+     * @param string $wrapper
+     */
+    public function setWrapper(string $wrapper)
+    {
+        $this->wrapper = $wrapper;
+    }
+
 
 }

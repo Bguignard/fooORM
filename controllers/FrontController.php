@@ -17,11 +17,17 @@ class FrontController
     {
         switch ($this->page){
             case 'home':
-                return new Page('Welcome to FooOrm', './views/v_home.php');
+                return new Page('Welcome to FooOrm', './views/v_home.php', ['js/s_home.js']);
                 break;
             default:
-                return new Page('Welcome to FooOrm', './views/v_home.php');
+                return new Page('Welcome to FooOrm', './views/v_home.php', ['js/s_home.js']);
                 break;
         }
+    }
+
+    public static function getScripts($page)
+    {
+
+
     }
 }
