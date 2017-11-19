@@ -9,9 +9,10 @@ $(document).ready(function () {
             data: formData
         })
         //callback
-            .done(function(data) {
-                $("#test").html(data);
-            });
-
+        .done(function(data) {
+            $.each(data, function (key, val) {
+                $("#test").append(val);
+            })
+        });
     });
 });
