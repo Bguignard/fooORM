@@ -30,17 +30,19 @@ class ClassMaker
     }
 
     //todo : ajouter la classe connexion et la classe DAO
-    public function classWritter($name, $attributes)
+    public function classWritter($tableName, $attributes)
     {
         $endl = "\r";
         $endlTab = $endl . '    ';
         $endlTab2 = $endlTab . '    ';
+        $endlTab3 = $endlTab2 . '    ';
         $strGtrStr = '';
-        $str = '<?php ' .$endl . ' class '. Tools::fromTableNameToClassName($name) . ' extends DAO' . $endl . '{' . $endlTab;
+        $attrTypes = '';
+        $str = '<?php ' .$endl . ' class '. Tools::fromTableNameToClassName($tableName) . ' extends DAO' . $endl . '{' . $endlTab;
         $primaryKeyName = '';
         $primaryKeyType = '';
         foreach ($attributes as $attribute) {
-            if($attribute->Field == $this->getPrimaryKeyName($name)){
+            if($attribute->Field == $this->getPrimaryKeyName($tableName)){
                 $primaryKeyName = $attribute->Field;
                 $primaryKeyType = $this->fromMySqlToPhpTypes($attribute->Type);
             }
@@ -55,6 +57,8 @@ class ClassMaker
             $strGtrStr .= 'public function get' . ucfirst($attribute->Field) . '(){' . $endlTab2 . 'return $this->' . $attribute->Field . ';' . $endlTab . '}' . $endlTab;
             //incrementing setters
             $strGtrStr .= 'public function set' . ucfirst($attribute->Field) . '($' . $attribute->Field . '){' . $endlTab2 . '$this->' . $attribute->Field . ' = $' . $attribute->Field . ';' . $endlTab . '}' . $endlTab;
+            //incrementing types
+            $attrTypes .= 'if($attributeName == \'' . $attribute->Field . '\'){' . $endlTab3 . 'return PDO::' . $this->fromMysqlToPdoType($attribute->Type) . ';' . $endlTab2 . '}' . $endlTab2;
         }
         //incrementing constructor
         $str .= $endlTab . '//Constructor' . $endlTab;
@@ -62,9 +66,11 @@ class ClassMaker
 
         //incrementing functions
         $str .= '//DAO basic functions' . $endlTab;
-        $str .= 'public function getTableName(){' . $endlTab2 . 'return \'' . $name . '\';' . $endlTab . '}' . $endlTab;
-        $str .= 'public function getPrimaryKeyName(){' . $endlTab2 . 'return \'' . $this->getPrimaryKeyName($name) . '\';' . $endlTab . '}' . $endlTab;
-        $str .= 'public function getPrimaryKeyValue(){' . $endlTab2 . 'return $this->' . $this->getPrimaryKeyName($name) . ';' . $endlTab . '}' . $endl .$endlTab;
+        $str .= 'public function getTableName(){' . $endlTab2 . 'return \'' . $tableName . '\';' . $endlTab . '}' . $endlTab;
+        $str .= 'public function getPrimaryKeyName(){' . $endlTab2 . 'return \'' . $this->getPrimaryKeyName($tableName) . '\';' . $endlTab . '}' . $endlTab;
+        $str .= 'public function getPrimaryKeyValue(){' . $endlTab2 . 'return $this->' . $this->getPrimaryKeyName($tableName) . ';' . $endlTab . '}' . $endl .$endlTab;
+        $str .= '//Tools' . $endlTab;
+        $str .= 'public function getPDOType($attributeName){' . $endlTab2 . $attrTypes . 'else{' . $endlTab3 . ' return PDO::PARAM_NULL;' . $endlTab2 . '}' . $endlTab . '}' . $endl .$endlTab;
         $str .= '//Getters and setters' . $endlTab;
         $str .= $strGtrStr;
         $str .= $endl . '}';
@@ -131,5 +137,26 @@ class ClassMaker
             default :
                 return '\'\'';
         }
+    }
+
+    public function fromMysqlToPdoType($type)
+    {
+        $type = strtolower($type);
+        if(strpos($type, 'char') !== false
+            || strpos($type, 'text') !== false
+            || strpos($type, 'blob') !== false
+            || strpos($type, 'date') !== false
+            || strpos($type, 'time') !== false
+            || strpos($type, 'enum') !== false){
+            return 'PARAM_STR';
+        }
+        elseif(strpos($type, 'int') !== false)
+            return 'PARAM_INT';
+        elseif(strpos($type, 'float') !== false)
+            return 'PARAM_INT';
+        elseif(strpos($type, 'double') !== false)
+            return 'PARAM_INT';
+        else
+            return 'PARAM_NULL';
     }
 }
