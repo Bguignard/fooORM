@@ -32,7 +32,7 @@ class ClassMaker
     }
 
     //todo : ajouter la classe connexion et la classe DAO
-    public function classWritter($name, $attributes)
+    public function classWritter($tableName, $attributes)
     {
         $tab = '    ';
         $tab2 = '    ' . $tab;
@@ -43,11 +43,10 @@ class ClassMaker
         $edt[] = '<?php';
         $edt[] = 'class '. Tools::fromTableNameToClassName($name) . ' extends DAO';
         $edt[] = '{';
-
         $primaryKeyName = '';
         $primaryKeyType = '';
         foreach ($attributes as $attribute) {
-            if($attribute->Field == $this->getPrimaryKeyName($name)){
+            if($attribute->Field == $this->getPrimaryKeyName($tableName)){
                 $primaryKeyName = $attribute->Field;
                 $primaryKeyType = $this->fromMySqlToPhpTypes($attribute->Type);
             }
@@ -161,5 +160,26 @@ class ClassMaker
             default :
                 return '\'\'';
         }
+    }
+
+    public function fromMysqlToPdoType($type)
+    {
+        $type = strtolower($type);
+        if(strpos($type, 'char') !== false
+            || strpos($type, 'text') !== false
+            || strpos($type, 'blob') !== false
+            || strpos($type, 'date') !== false
+            || strpos($type, 'time') !== false
+            || strpos($type, 'enum') !== false){
+            return 'PARAM_STR';
+        }
+        elseif(strpos($type, 'int') !== false)
+            return 'PARAM_INT';
+        elseif(strpos($type, 'float') !== false)
+            return 'PARAM_INT';
+        elseif(strpos($type, 'double') !== false)
+            return 'PARAM_INT';
+        else
+            return 'PARAM_NULL';
     }
 }
