@@ -22,7 +22,9 @@ class ClassMaker
         foreach ($this->tableArray as $table){
             $columnTabs = $this->getColumns($table);
             $file = fopen($this->dir . '/' . Tools::fromTableNameToClassName($table) . '.php','w') or die(array_push($result, "Erreur pour la table " . $table));
-            fwrite($file, $this->classWritter($table, $columnTabs));
+            foreach ($this->classWritter($table, $columnTabs) as $line){
+                fwrite($file, $line . PHP_EOL);
+            }
             fclose($file);
             array_push($result, 'Création de la classe associée à la table ' . $table);
         }
@@ -32,11 +34,16 @@ class ClassMaker
     //todo : ajouter la classe connexion et la classe DAO
     public function classWritter($name, $attributes)
     {
-        $endl = "\r";
-        $endlTab = $endl . '    ';
-        $endlTab2 = $endlTab . '    ';
-        $strGtrStr = '';
-        $str = '<?php ' .$endl . ' class '. Tools::fromTableNameToClassName($name) . ' extends DAO' . $endl . '{' . $endlTab;
+        $tab = '    ';
+        $tab2 = '    ' . $tab;
+        //keys tab
+        $ktb =[];
+        //return tab
+        $edt =[];
+        $edt[] = '<?php';
+        $edt[] = 'class '. Tools::fromTableNameToClassName($name) . ' extends DAO';
+        $edt[] = '{';
+
         $primaryKeyName = '';
         $primaryKeyType = '';
         foreach ($attributes as $attribute) {
@@ -44,31 +51,54 @@ class ClassMaker
                 $primaryKeyName = $attribute->Field;
                 $primaryKeyType = $this->fromMySqlToPhpTypes($attribute->Type);
             }
+
             //incrementing attributes
-            $str .= '/**' . $endlTab;
-            $str .= '* Sql type :  ' . $attribute->Type . $endlTab;
-            $str .= '* @var ' . $this->fromMySqlToPhpTypes($attribute->Type) . $endlTab;
-            $str .= '**/' . $endlTab;
-            $str .= 'private $' . $attribute->Field . ';' . $endlTab;
+            $edt[] = $tab . '/**';
+            $edt[] = $tab . '* Sql type :  ' . $attribute->Type;
+            $edt[] = $tab . '* @var ' . $this->fromMySqlToPhpTypes($attribute->Type);
+            $edt[] = $tab . '**/';
+            $edt[] = $tab . 'protected $' . $attribute->Field . ';';
 
             //incrementing getters
-            $strGtrStr .= 'public function get' . ucfirst($attribute->Field) . '(){' . $endlTab2 . 'return $this->' . $attribute->Field . ';' . $endlTab . '}' . $endlTab;
+            $ktb[] = $tab . '//Return '. $attribute->Field;
+            $ktb[] = $tab . 'public function get' . ucfirst($attribute->Field) . '(){';
+            $ktb[] = $tab2 . 'return $this->' . $attribute->Field . ';';
+            $ktb[] = $tab . '}';
+
             //incrementing setters
-            $strGtrStr .= 'public function set' . ucfirst($attribute->Field) . '($' . $attribute->Field . '){' . $endlTab2 . '$this->' . $attribute->Field . ' = $' . $attribute->Field . ';' . $endlTab . '}' . $endlTab;
+            $ktb[] = $tab . '//Setting '. $attribute->Field;
+            $ktb[] = $tab . 'public function set' . ucfirst($attribute->Field) . '($' . $attribute->Field . '){';
+            $ktb[] = $tab2 . ' $this->' . $attribute->Field . ' = $' . $attribute->Field . ';';
+            $ktb[] = $tab . '}';
         }
+
         //incrementing constructor
-        $str .= $endlTab . '//Constructor' . $endlTab;
-        $str .= 'public function __construct($'.$primaryKeyName.' = ' . $this->getDefaultValueFromType($primaryKeyType) . '){' . $endlTab2 . '$this->' . $primaryKeyName . ' = $' . $primaryKeyName . ';' . $endlTab . '}' . $endl .$endlTab;
+        $edt[] = $tab . '//Constructor';
+        $edt[] = $tab . 'public function __construct($'.$primaryKeyName.' = ' . $this->getDefaultValueFromType($primaryKeyType) . '){';
+        $edt[] = $tab2 . '$this->' . $primaryKeyName . ' = $' . $primaryKeyName . ';';
+        $edt[] = $tab . '}';
 
         //incrementing functions
-        $str .= '//DAO basic functions' . $endlTab;
-        $str .= 'public function getTableName(){' . $endlTab2 . 'return \'' . $name . '\';' . $endlTab . '}' . $endlTab;
-        $str .= 'public function getPrimaryKeyName(){' . $endlTab2 . 'return \'' . $this->getPrimaryKeyName($name) . '\';' . $endlTab . '}' . $endlTab;
-        $str .= 'public function getPrimaryKeyValue(){' . $endlTab2 . 'return $this->' . $this->getPrimaryKeyName($name) . ';' . $endlTab . '}' . $endl .$endlTab;
-        $str .= '//Getters and setters' . $endlTab;
-        $str .= $strGtrStr;
-        $str .= $endl . '}';
-        return $str;
+        $edt[] = $tab . '/**********************';
+        $edt[] = $tab . '* DAO basic functions *';
+        $edt[] = $tab . '***********************/';
+        $edt[] = $tab . 'public function getTableName(){';
+        $edt[] = $tab2 . 'return \'' . $name . '\';';
+        $edt[] = $tab . '}';
+        $edt[] = $tab . 'public function getPrimaryKeyName(){';
+        $edt[] = $tab2 . 'return \'' . $this->getPrimaryKeyName($name) . '\';';
+        $edt[] = $tab . '}';
+        $edt[] = $tab . 'public function getPrimaryKeyValue(){';
+        $edt[] = $tab2 . 'return $this->' . $this->getPrimaryKeyName($name) . ';';
+        $edt[] = $tab . '}';
+        $edt[] = $tab . '/**********************';
+        $edt[] = $tab . '* Getters and setters *';
+        $edt[] = $tab . '***********************/';
+
+        $ret = array_merge($edt, $ktb);
+        $ret[] = '}';
+
+        return $ret;
     }
 
     //getting all tables
