@@ -41,7 +41,7 @@ class ClassMaker
         //return tab
         $edt =[];
         $edt[] = '<?php';
-        $edt[] = 'class '. Tools::fromTableNameToClassName($name) . ' extends DAO';
+        $edt[] = 'class '. Tools::fromTableNameToClassName($tableName) . ' extends DAO';
         $edt[] = '{';
         $primaryKeyName = '';
         $primaryKeyType = '';
@@ -72,8 +72,9 @@ class ClassMaker
         }
 
         //incrementing constructor
+        //todo : surcharge !!
         $edt[] = $tab . '//Constructor';
-        $edt[] = $tab . 'public function __construct($'.$primaryKeyName.' = ' . $this->getDefaultValueFromType($primaryKeyType) . '){';
+        $edt[] = $tab . 'public function __construct(' . $this->getConstructorParams($attributes) . '){';
         $edt[] = $tab2 . '$this->' . $primaryKeyName . ' = $' . $primaryKeyName . ';';
         $edt[] = $tab . '}';
 
@@ -82,13 +83,13 @@ class ClassMaker
         $edt[] = $tab . '* DAO basic functions *';
         $edt[] = $tab . '***********************/';
         $edt[] = $tab . 'public function getTableName(){';
-        $edt[] = $tab2 . 'return \'' . $name . '\';';
+        $edt[] = $tab2 . 'return \'' . $tableName . '\';';
         $edt[] = $tab . '}';
         $edt[] = $tab . 'public function getPrimaryKeyName(){';
-        $edt[] = $tab2 . 'return \'' . $this->getPrimaryKeyName($name) . '\';';
+        $edt[] = $tab2 . 'return \'' . $this->getPrimaryKeyName($tableName) . '\';';
         $edt[] = $tab . '}';
         $edt[] = $tab . 'public function getPrimaryKeyValue(){';
-        $edt[] = $tab2 . 'return $this->' . $this->getPrimaryKeyName($name) . ';';
+        $edt[] = $tab2 . 'return $this->' . $this->getPrimaryKeyName($tableName) . ';';
         $edt[] = $tab . '}';
         $edt[] = $tab . '/**********************';
         $edt[] = $tab . '* Getters and setters *';
@@ -181,5 +182,18 @@ class ClassMaker
             return 'PARAM_INT';
         else
             return 'PARAM_NULL';
+    }
+
+    public function getConstructorParams($attributes)
+    {
+        $surcharge = '';
+        foreach ($attributes as $key => $attribute){
+            $type = $this->fromMySqlToPhpTypes($attribute->Type);
+            if($key !== 0){
+                $surcharge .= ', ';
+            }
+            $surcharge .= '$' . $attribute->Field . ' = ' . $this->getDefaultValueFromType($type);
+        }
+        return $surcharge;
     }
 }
