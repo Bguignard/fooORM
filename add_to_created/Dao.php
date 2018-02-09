@@ -142,6 +142,19 @@ class Dao implements CrudDao
         return $arr;
     }
 
+    public function generateParamKnownTab($fieldName = 'undefined')
+    {
+        $arr = [];
+        foreach (get_object_vars($this) as $attrName => $attrValue){
+            if($attrName == $fieldName){
+                $arr[':' . $attrName] = false;
+            }
+            else{
+                $arr[':' . $attrName] = true;
+            }
+        }
+        return $arr;
+    }
     public function getItemArray()
     {
         return get_object_vars($this);

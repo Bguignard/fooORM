@@ -41,6 +41,8 @@ class ClassMaker
         //return tab
         $edt =[];
         $edt[] = '<?php';
+        $edt[] = '//This file has been generated, DON\'T MODIFY IT, it will be overwritten by next update';
+        $edt[] = '';
         $edt[] = 'class '. Tools::fromTableNameToClassName($tableName) . ' extends DAO';
         $edt[] = '{';
         $primaryKeyName = '';
@@ -59,12 +61,14 @@ class ClassMaker
             $edt[] = $tab . 'protected $' . $attribute->Field . ';';
 
             //incrementing getters
+            $ktb[] = '';
             $ktb[] = $tab . '//Return '. $attribute->Field;
             $ktb[] = $tab . 'public function get' . ucfirst($attribute->Field) . '(){';
             $ktb[] = $tab2 . 'return $this->' . $attribute->Field . ';';
             $ktb[] = $tab . '}';
 
             //incrementing setters
+            $ktb[] = '';
             $ktb[] = $tab . '//Setting '. $attribute->Field;
             $ktb[] = $tab . 'public function set' . ucfirst($attribute->Field) . '($' . $attribute->Field . '){';
             $ktb[] = $tab2 . ' $this->' . $attribute->Field . ' = $' . $attribute->Field . ';';
@@ -72,25 +76,31 @@ class ClassMaker
         }
 
         //incrementing constructor
-        //todo : surcharge !!
+        $edt[] = '';
         $edt[] = $tab . '//Constructor';
         $edt[] = $tab . 'public function __construct(' . $this->getConstructorParams($attributes) . '){';
         $edt[] = $tab2 . '$this->' . $primaryKeyName . ' = $' . $primaryKeyName . ';';
         $edt[] = $tab . '}';
 
         //incrementing functions
+        $edt[] = '';
+        $edt[] = '';
         $edt[] = $tab . '/**********************';
         $edt[] = $tab . '* DAO basic functions *';
         $edt[] = $tab . '***********************/';
         $edt[] = $tab . 'public function getTableName(){';
         $edt[] = $tab2 . 'return \'' . $tableName . '\';';
         $edt[] = $tab . '}';
+        $edt[] = '';
         $edt[] = $tab . 'public function getPrimaryKeyName(){';
         $edt[] = $tab2 . 'return \'' . $this->getPrimaryKeyName($tableName) . '\';';
         $edt[] = $tab . '}';
+        $edt[] = '';
         $edt[] = $tab . 'public function getPrimaryKeyValue(){';
         $edt[] = $tab2 . 'return $this->' . $this->getPrimaryKeyName($tableName) . ';';
         $edt[] = $tab . '}';
+        $edt[] = '';
+        $edt[] = '';
         $edt[] = $tab . '/**********************';
         $edt[] = $tab . '* Getters and setters *';
         $edt[] = $tab . '***********************/';

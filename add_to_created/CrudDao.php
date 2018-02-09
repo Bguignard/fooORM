@@ -1,6 +1,5 @@
 <?php
 
-
 interface CrudDao
 {
     public function selectThis();
@@ -10,4 +9,10 @@ interface CrudDao
     public function deleteThis();
 
     public function updateThis();
+
+    public function getTableName();
+
+    public function getPrimaryKeyName();
+
+    public function getPrimaryKeyValue();
 }
