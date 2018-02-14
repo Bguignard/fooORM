@@ -5,6 +5,8 @@ class ClassMaker
     private $tableArray = [];
     private $pdo = null;
     private $dir = '../../created';
+    private static $tab = '    ';
+    private static $tab2 = '        ';
 
     public function __construct($dbName, $userName, $password)
     {
@@ -34,8 +36,6 @@ class ClassMaker
     //todo : ajouter la classe connexion et la classe DAO
     public function classWritter($tableName, $attributes)
     {
-        $tab = '    ';
-        $tab2 = '    ' . $tab;
         //keys tab
         $ktb =[];
         //return tab
@@ -53,56 +53,56 @@ class ClassMaker
             }
 
             //incrementing attributes
-            $edt[] = $tab . '/**';
-            $edt[] = $tab . '* Sql type :  ' . $attribute->Type;
-            $edt[] = $tab . '* @var ' . $this->fromMySqlToPhpTypes($attribute->Type);
-            $edt[] = $tab . '**/';
-            $edt[] = $tab . 'protected $' . $attribute->Field . ';';
+            $edt[] = $this::$tab . '/**';
+            $edt[] = $this::$tab . '* Sql type :  ' . $attribute->Type;
+            $edt[] = $this::$tab . '* @var ' . $this->fromMySqlToPhpTypes($attribute->Type);
+            $edt[] = $this::$tab . '**/';
+            $edt[] = $this::$tab . 'protected $' . $attribute->Field . ';';
 
             //incrementing getters
             $ktb[] = '';
-            $ktb[] = $tab . '//Return '. $attribute->Field;
-            $ktb[] = $tab . 'public function get' . ucfirst($attribute->Field) . '(){';
-            $ktb[] = $tab2 . 'return $this->' . $attribute->Field . ';';
-            $ktb[] = $tab . '}';
+            $ktb[] = $this::$tab . '//Return '. $attribute->Field;
+            $ktb[] = $this::$tab . 'public function get' . ucfirst($attribute->Field) . '(){';
+            $ktb[] = $this::$tab2 . 'return $this->' . $attribute->Field . ';';
+            $ktb[] = $this::$tab . '}';
 
             //incrementing setters
             $ktb[] = '';
-            $ktb[] = $tab . '//Setting '. $attribute->Field;
-            $ktb[] = $tab . 'public function set' . ucfirst($attribute->Field) . '($' . $attribute->Field . '){';
-            $ktb[] = $tab2 . ' $this->' . $attribute->Field . ' = $' . $attribute->Field . ';';
-            $ktb[] = $tab . '}';
+            $ktb[] = $this::$tab . '//Setting '. $attribute->Field;
+            $ktb[] = $this::$tab . 'public function set' . ucfirst($attribute->Field) . '($' . $attribute->Field . '){';
+            $ktb[] = $this::$tab2 . ' $this->' . $attribute->Field . ' = $' . $attribute->Field . ';';
+            $ktb[] = $this::$tab . '}';
         }
 
         //incrementing constructor
         $edt[] = '';
-        $edt[] = $tab . '//Constructor';
-        $edt[] = $tab . 'public function __construct(' . $this->getConstructorParams($attributes) . '){';
-        $edt[] = $tab2 . '$this->' . $primaryKeyName . ' = $' . $primaryKeyName . ';';
-        $edt[] = $tab . '}';
+        $edt[] = $this::$tab . '//Constructor';
+        $edt[] = $this::$tab . 'public function __construct(' . $this->getConstructorParams($attributes) . '){';
+        $edt = $this->getConstructorValues($attributes, $edt);
+        $edt[] = $this::$tab . '}';
 
         //incrementing functions
         $edt[] = '';
         $edt[] = '';
-        $edt[] = $tab . '/**********************';
-        $edt[] = $tab . '* DAO basic functions *';
-        $edt[] = $tab . '***********************/';
-        $edt[] = $tab . 'public function getTableName(){';
-        $edt[] = $tab2 . 'return \'' . $tableName . '\';';
-        $edt[] = $tab . '}';
+        $edt[] = $this::$tab . '/**********************';
+        $edt[] = $this::$tab . '* DAO basic functions *';
+        $edt[] = $this::$tab . '***********************/';
+        $edt[] = $this::$tab . 'public function getTableName(){';
+        $edt[] = $this::$tab2 . 'return \'' . $tableName . '\';';
+        $edt[] = $this::$tab . '}';
         $edt[] = '';
-        $edt[] = $tab . 'public function getPrimaryKeyName(){';
-        $edt[] = $tab2 . 'return \'' . $this->getPrimaryKeyName($tableName) . '\';';
-        $edt[] = $tab . '}';
+        $edt[] = $this::$tab . 'public function getPrimaryKeyName(){';
+        $edt[] = $this::$tab2 . 'return \'' . $this->getPrimaryKeyName($tableName) . '\';';
+        $edt[] = $this::$tab . '}';
         $edt[] = '';
-        $edt[] = $tab . 'public function getPrimaryKeyValue(){';
-        $edt[] = $tab2 . 'return $this->' . $this->getPrimaryKeyName($tableName) . ';';
-        $edt[] = $tab . '}';
+        $edt[] = $this::$tab . 'public function getPrimaryKeyValue(){';
+        $edt[] = $this::$tab2 . 'return $this->' . $this->getPrimaryKeyName($tableName) . ';';
+        $edt[] = $this::$tab . '}';
         $edt[] = '';
         $edt[] = '';
-        $edt[] = $tab . '/**********************';
-        $edt[] = $tab . '* Getters and setters *';
-        $edt[] = $tab . '***********************/';
+        $edt[] = $this::$tab . '/**********************';
+        $edt[] = $this::$tab . '* Getters and setters *';
+        $edt[] = $this::$tab . '***********************/';
 
         $ret = array_merge($edt, $ktb);
         $ret[] = '}';
@@ -204,5 +204,13 @@ class ClassMaker
             $surcharge .= '$' . $attribute->Field . ' = ' . $this->getDefaultValueFromType($type);
         }
         return $surcharge;
+    }
+
+    public function getConstructorValues($attributes, $tab)
+    {
+        foreach ($attributes as $key => $attribute){
+            $tab[] = $this::$tab2 . '$this->' . $attribute->Field . ' = $' .$attribute->Field . ';';
+        }
+        return $tab;
     }
 }
