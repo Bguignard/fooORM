@@ -43,10 +43,9 @@ class ClassMaker
         $edt[] = '<?php';
         $edt[] = '//This file has been generated, DON\'T MODIFY IT, it will be overwritten by next update';
         $edt[] = '';
-        $edt[] = 'class '. Tools::fromTableNameToClassName($tableName) . ' extends DAO';
+        $edt[] = 'class '. Tools::fromTableNameToClassName($tableName) . ' extends Dao';
         $edt[] = '{';
         $primaryKeyName = '';
-        $primaryKeyType = '';
         foreach ($attributes as $attribute) {
             if($attribute->Field == $this->getPrimaryKeyName($tableName)){
                 $primaryKeyName = $attribute->Field;
