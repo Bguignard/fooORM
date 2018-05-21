@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * This file creates each DAO class from DB
+ * If you want to have php < 7 compatibility, just set the $PHP7 var to false
+ */
+
 class ClassMaker
 {
     private $tableArray = [];
@@ -7,6 +12,7 @@ class ClassMaker
     private $dir = '../../created';
     private static $tab = '    ';
     private static $tab2 = '        ';
+    private static $PHP71 = true;
 
     public function __construct($dbName, $userName, $password)
     {
@@ -87,16 +93,38 @@ class ClassMaker
         $edt[] = $this::$tab . '/**********************';
         $edt[] = $this::$tab . '* DAO basic functions *';
         $edt[] = $this::$tab . '***********************/';
-        $edt[] = $this::$tab . 'public function getTableName(){';
+        $edt[] = $this::$tab . '/**';
+        $edt[] = $this::$tab . '* @return string';
+        $edt[] = $this::$tab . '*/';
+        $edt[] = $this::$tab . 'public function getTableName() :string{';
         $edt[] = $this::$tab2 . 'return \'' . $tableName . '\';';
         $edt[] = $this::$tab . '}';
         $edt[] = '';
-        $edt[] = $this::$tab . 'public function getPrimaryKeyName(){';
+        $edt[] = $this::$tab . '/**';
+        $edt[] = $this::$tab . '* @return string';
+        $edt[] = $this::$tab . '*/';
+        $edt[] = $this::$tab . 'public function getPrimaryKeyName() :string{';
         $edt[] = $this::$tab2 . 'return \'' . $this->getPrimaryKeyName($tableName) . '\';';
         $edt[] = $this::$tab . '}';
         $edt[] = '';
         $edt[] = $this::$tab . 'public function getPrimaryKeyValue(){';
         $edt[] = $this::$tab2 . 'return $this->' . $this->getPrimaryKeyName($tableName) . ';';
+        $edt[] = $this::$tab . '}';
+        $edt[] = '';
+        $edt[] = '';
+        $edt[] = $this::$tab . '/**********************';
+        $edt[] = $this::$tab . '* Overrides *';
+        $edt[] = $this::$tab . '***********************/';
+        $edt[] = $this::$tab . '/**';
+        $edt[] = $this::$tab . '* @return ' . Tools::fromTableNameToClassName($tableName) . '|null';
+        $edt[] = $this::$tab . '*/';
+        if($this::$PHP71){
+            $edt[] = $this::$tab . 'public function selectThis(): ?' . Tools::fromTableNameToClassName($tableName) . '{';
+        }
+        else{
+            $edt[] = $this::$tab . 'public function selectThis(){';
+        }
+        $edt[] = $this::$tab2 . 'return parent::selectThis() instanceOf ' . Tools::fromTableNameToClassName($tableName) . ' ? parent::selectThis() : null;';
         $edt[] = $this::$tab . '}';
         $edt[] = '';
         $edt[] = '';
